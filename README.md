@@ -3,7 +3,7 @@
 This project is an attempt to produce an application dedicated to learning the Polish sign alphabet: <br />
 
 <p align="center">
-  <img src="https://github.com/worthy11/PJMRecognizer/img/polski-alfabet-palcowy.jpg" alt="Polish sign alphabet"/>
+  <img src="https://github.com/worthy11/PJMRecognizer/blob/main/img/polski-alfabet-palcowy.jpg" alt="Polish sign alphabet"/>
 </p>
 
 Currently only the backbone network responsible for classifying letters from weebcam feed has been implemented.
@@ -29,7 +29,7 @@ The default training parameters for the network are as follows:
 The input vector is a flattened 21x21 array representing the distances between each pair of the 21 hand landmarks produced by Mediapipe's hand recognizer, where a value located at `input[i][j]` represents the distance (proportional to the hand's height and width in the frame) between landmarks `i` and `j`, given by the square root of the squared difference of their respective `x` and `y` coordinates.: <br />
 
 <p align="center">
-  <img src="https://github.com/worthy11/PJMRecognizer/img/hand_landmarks.png" alt="Hand landmark indexing in Mediapipe"/>
+  <img src="https://github.com/worthy11/PJMRecognizer/blob/main/img/hand_landmarks.png" alt="Hand landmark indexing in Mediapipe"/>
 </p>
 
 ### Usage
