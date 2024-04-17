@@ -6,7 +6,7 @@ This project is an attempt to produce an application dedicated to learning the P
   <img src="https://github.com/worthy11/PJMRecognizer/blob/main/img/polski-alfabet-palcowy.jpg" alt="Polish sign alphabet"/>
 </p>
 
-Currently only the backbone network responsible for classifying letters from weebcam feed has been implemented.
+Currently only the backbone network responsible for classifying letters from webcam feed has been implemented.
 
 ### Architecture
 The program uses OpenCV and Mediapipe to retrieve video feed and detect hands in subsequent frames. The underlying network consists of the following layers: <br />
