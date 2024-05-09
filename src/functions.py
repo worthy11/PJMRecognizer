@@ -4,6 +4,7 @@ import mediapipe as mp
 import csv
 import os
 
+letters = "abcdefghiklmnoprsuwyz"
 classes: dict[int, str] = {
     0: 'A',
     1: 'B',
@@ -14,23 +15,18 @@ classes: dict[int, str] = {
     6: 'G',
     7: 'H',
     8: 'I',
-    9: 'J',
-    10: 'K',
-    11: 'L',
-    12: 'M',
-    13: 'N',
-    14: 'O',
-    15: 'P',
-    16: 'Q',
-    17: 'R',
-    18: 'S',
-    19: 'T',
-    20: 'U',
-    21: 'V',
-    22: 'W',
-    23: 'X',
-    24: 'Y',
-    25: 'Z'
+    9: 'K',
+    10: 'L',
+    11: 'M',
+    12: 'N',
+    13: 'O',
+    14: 'P',
+    15: 'R',
+    16: 'S',
+    17: 'U',
+    18: 'W',
+    19: 'Y',
+    20: 'Z'
 }
 landmarks = {
     0: 'WRIST',

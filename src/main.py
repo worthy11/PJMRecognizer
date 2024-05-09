@@ -1,10 +1,11 @@
 from data_loader import *
 from model import *
 from functions import *
+from tester import *
 
 # Model able to accept new samples and train during runtime; newly learned information can be verified immediately after training
 def main():
-    recognizer = Model(classes, epochs=10, batch_size=1, learning_rate=0.00001, from_checkpoint=True)
+    recognizer = Model(classes, epochs=10, batch_size=1, learning_rate=0.00001)
     capture = cv2.VideoCapture(0)
     mp_hands = mp.solutions.hands
     hand_recognizer = mp_hands.Hands()
@@ -16,7 +17,7 @@ def main():
                            # Press SPACE to toggle
     display_landmarks = True # Landmarks displayed by default
                              # Press ENTER to toggle
-    while(True):
+    while 1:
         not_empty, img = capture.read()
         if not_empty:
             h, w, c = img.shape
@@ -48,14 +49,16 @@ def main():
                     if results.multi_hand_landmarks:
                         for hand_landmarks in results.multi_hand_landmarks:
                             sample = ConvertToNumpy(hand_landmarks)
+
                             print('Waiting for label')
                             label = cv2.waitKey() - 97
-                            if label < 0 or label > 25: # If not a lowercase letter
+                            if chr(label) not in letters: # If not a lowercase letter
                                 print('Invalid label. Cancelled saving sample')
+
                             else:
                                 filepath = 'pjm_' + save_mode + '_set.csv'
-                                if AddSample(sample, str(label), filepath):
-                                    print('Saved sample with label {}'.format(classes[label]))
+                                if AddSample(sample, letters.find(chr(label)), filepath):
+                                    print('Saved sample with label {}'.format(chr(label)))
                                 else:
                                     print('Failed to save sample')
                         
