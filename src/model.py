@@ -1,6 +1,9 @@
 from keras.layers import Dense, Flatten
 from keras.models import Sequential, load_model
 from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint
+import tensorflow as tf
+import tf2onnx
+import onnx
 import os
 from data_loader import *
 
@@ -24,9 +27,8 @@ class Model():
 
     def InitializeFromArchitecture(self):
         model = Sequential()
-        model.add(Flatten(input_shape=(21, 21)))
-        model.add(Dense(256, 'relu', True))
-        model.add(Dense(128, 'relu', True))
+        model.add(Flatten())
+        model.add(Dense(100, 'relu'))
         model.add(Dense(units=len(self.classes), activation='softmax'))
         return model
     
@@ -34,7 +36,7 @@ class Model():
         (train_set, train_labels), (test_set, test_labels) = LoadData(len(self.classes))
 
         if to_checkpoint:
-            filepath = './src/model.keras'
+            filepath = './src/weights.keras'
             checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
             callbacks_list = [checkpoint]
             history = self.model.fit(train_set,
@@ -47,6 +49,10 @@ class Model():
             self.model = new_model
             self.model.compile(loss='categorical_crossentropy', optimizer='adam')
 
+            input_signature = [tf.TensorSpec(441, tf.float32, name='x')]
+            onnx_model, _ = tf2onnx.convert.from_keras(self.model, input_signature, opset=13)
+            onnx.save(onnx_model, "pjmrecognizer.onnx")
+
         else:
             history = self.model.fit(train_set,
                                      train_labels,
@@ -55,11 +61,11 @@ class Model():
                                      validation_data=(test_set, test_labels),
                                      callbacks = [self.learning_rate])
         results = self.model.evaluate(test_set, test_labels)
-        print('Results: '.format(results))
         return (history, results)
         
     def Predict(self, sample: np.array) -> str:
         predictions = self.model(sample)
+        print(predictions)
         label = self.classes[np.argmax(predictions)]
         confidence = np.max(predictions) / np.sum(predictions)
         return label, confidence 
