@@ -53,25 +53,14 @@ landmarks = {
 }
 
 def ComputeDistances(arr: np.array, ndims: int) -> np.array:
-    if ndims == 2:
-        w = np.max(arr[:, 0]) - np.min(arr[:, 0])
-        h = np.max(arr[:, 1]) - np.min(arr[:, 1])
-        distances = np.empty((21, 21))
-        for i in range(21):
-            for j in range(21):
-                dx = (arr[j][0] - arr[i][0]) / w
-                dy = (arr[j][1] - arr[i][1]) / h
-                distances[i][j] = np.sqrt(dx**2 + dy**2)
-    else:
-        distances = np.empty((len(classes), 21, 21))
-        for i in range(len(classes)):
-            w = np.max(arr[i][:, 0]) - np.min(arr[i][:, 0])
-            h = np.max(arr[i][:, 1]) - np.min(arr[i][:, 1])
-            for j in range(21):
-                for k in range(21):
-                    dx = (arr[i][k][0] - arr[i][j][0]) / w
-                    dy = (arr[i][k][1] - arr[i][j][1]) / h
-                    distances[i][j][k] = np.sqrt(dx**2 + dy**2)
+    w = np.max(arr[:, 0]) - np.min(arr[:, 0])
+    h = np.max(arr[:, 1]) - np.min(arr[:, 1])
+    distances = np.empty(441)
+    for i in range(21):
+        for j in range(21):
+            dx = (arr[j][0] - arr[i][0]) / w
+            dy = (arr[j][1] - arr[i][1]) / h
+            distances[i*21+j] = np.sqrt(dx**2 + dy**2)
     return distances
 
 def ConvertToNumpy(hand_landmarks) -> np.array:
@@ -81,7 +70,6 @@ def ConvertToNumpy(hand_landmarks) -> np.array:
         coords.append([landmark.x, landmark.y])
     received = np.array(coords)
     observed = ComputeDistances(received, 2)
-    observed = observed.reshape(21*21)
     return observed
 
 # Predictions are made by comparing distances between landmarks with an established base (data/base.npy)

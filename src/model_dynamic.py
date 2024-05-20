@@ -12,11 +12,13 @@ class ModelRNN(nn.Module):
         self.i2h = nn.Linear(input_size, hidden_size)
         self.h2h = nn.Linear(hidden_size, hidden_size)
         self.h2o = nn.Linear(hidden_size, output_size)
+        self.flatten = nn.Flatten()
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, input, hidden):
         hidden = F.tanh(self.i2h(input) + self.h2h(hidden))
         output = self.h2o(hidden)
+        output = self.flatten(output)
         output = self.softmax(output)
         return output, hidden
 
@@ -31,15 +33,15 @@ def Train(model: ModelRNN, epochs, output_size):
 
     for epoch in range(epochs):
         epoch_loss = 0
-        
+        output = []
         for idx, sample in enumerate(train_set):
             
-            # n_frames x 1 x 462
-            tensor = torch.zeros(len(sample), 1, 462)
-            for idx, frame in enumerate(sample):
-                tensor[idx][0] = frame
+            # n_frames x 1 x 441
+            tensor = torch.zeros(len(sample), 1, 441)
+            for frame_idx, frame in enumerate(sample):
+                tensor[frame_idx][0] = torch.tensor(frame)
             
-            label = torch.tensor([1 if _ == train_labels[idx] else 0 for _ in range(output_size)])
+            label = torch.tensor([train_labels[idx]])
             
             hidden = model.initHidden()
             model.zero_grad()
@@ -58,10 +60,9 @@ def Train(model: ModelRNN, epochs, output_size):
         print(F'Epoch {epoch+1}: {epoch_loss}')
         epoch_loss = 0
 
-def Predict(model, sample):
-    output = model(sample)
-    output = list(output[0])
-    max_prob = max(output)
-    label = output.index(max_prob)
-    confidence = max_prob / sum(output)
-    return label, confidence
+def Predict(model, sample, hidden):
+    output, hidden = model(sample, hidden)
+    label = torch.argmax(output).item()
+    confidence = torch.max(output).item() / torch.sum(output).item()
+    print(output)
+    return label, confidence, hidden

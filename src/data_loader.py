@@ -34,18 +34,18 @@ def LoadDataDynamic():
     test_set = []
     test_labels = []
 
-    with open('src/data/pjm_training_set.csv') as file:
+    with open('src/data/pjm_dynamic_training_set.csv') as file:
         reader = csv.reader(file, delimiter=',')
         sample = []
         for line in reader:
             if len(line) == 1:
-                train_set.append(sample)
+                train_set.append(sample.copy())
                 train_labels.append(int(line[0]))
                 sample.clear()
             else:
                 sample.append([float(_) for _ in line])
 
-    with open('src/data/pjm_testing_set.csv') as file:
+    with open('src/data/pjm_dynamic_testing_set.csv') as file:
         reader = csv.reader(file, delimiter=',')
         sample = []
         for line in reader:
@@ -66,5 +66,5 @@ def LoadDataDynamic():
 
     # train_set = train_set.reshape(train_set.shape[0], 21, 21, 1)
     # test_set = test_set.reshape(test_set.shape[0], 21, 21, 1)
-
+    
     return (train_set, train_labels), (test_set, test_labels)
