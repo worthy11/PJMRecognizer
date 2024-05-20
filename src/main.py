@@ -89,10 +89,12 @@ def main_static():
                 work_mode = key
 
 def main_dynamic():
-    input_size = 22*21
+    input_size = 21*21
     hidden_size = 128
-    output_size = 5
-    epochs = 5
+    output_size = 2
+    epochs = 20
+    prev = torch.zeros(1, 1, 441)
+    curr = torch.zeros(1, 1, 441)
 
     recognizer = ModelRNN(input_size, hidden_size, output_size)
     Train(recognizer, epochs, output_size)
@@ -101,6 +103,7 @@ def main_dynamic():
     mp_hands = mp.solutions.hands
     hand_recognizer = mp_hands.Hands()
     mp_drawing = mp.solutions.drawing_utils
+    hidden = recognizer.initHidden()
 
     while 1:
         not_empty, img = capture.read()
@@ -112,14 +115,13 @@ def main_dynamic():
             if results.multi_hand_landmarks:
                 for hand_landmarks in results.multi_hand_landmarks:
                     sample = ConvertToNumpy(hand_landmarks)
-                    sample = torch.tensor(sample)
-                    sample = np.expand_dims(sample, axis=-1)
-                    sample = np.expand_dims(sample, axis=0)
+                    curr[0][0] = torch.tensor(sample)
 
-                    label, confidence = Predict(recognizer, sample)
+                    label, confidence, hidden = Predict(recognizer, torch.sub(curr, prev), hidden)
+                    prev.copy_(curr)
 
                     color = (0, confidence*255, (1-confidence)*255)
-                    cv2.putText(img, label, (w // 2, 70), cv2.FONT_HERSHEY_PLAIN, 5, color, 5)
+                    cv2.putText(img, str(label), (w // 2, 70), cv2.FONT_HERSHEY_PLAIN, 5, color, 5)
                     mp_drawing.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
         
         cv2.imshow('Webcam', img)
