@@ -160,15 +160,3 @@ def CreateBase() -> None:
     distances = ComputeDistances(letters, 3)
     np.save('src/data/base.npy', distances)
     print('Base created successfully')
-
-# Not implemented correctly yet - DO NOT USE
-# def DeleteLastSample(filepath: str) -> bool:
-#     f = open('src/data/'+filepath, 'r')
-#     lines = f.readlines()
-#     lines = lines[:-1]
-
-#     f = open('src/data/'+filepath, 'w')
-#     writer = csv.writer(f, delimiter=',')
-#     for line in lines:
-#         writer.writerow(line)
-#     return 1

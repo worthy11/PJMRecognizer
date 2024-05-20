@@ -28,7 +28,6 @@ class Model():
     def InitializeFromArchitecture(self):
         model = Sequential()
         model.add(Flatten())
-        model.add(Dense(100, 'relu'))
         model.add(Dense(units=len(self.classes), activation='softmax'))
         return model
     
@@ -49,8 +48,10 @@ class Model():
             self.model = new_model
             self.model.compile(loss='categorical_crossentropy', optimizer='adam')
 
-            input_signature = [tf.TensorSpec(441, tf.float32, name='x')]
+            self.model.output_names=['output']
+            input_signature = [tf.TensorSpec(self.model.inputs[0].shape, self.model.inputs[0].dtype, name='x')]
             onnx_model, _ = tf2onnx.convert.from_keras(self.model, input_signature, opset=13)
+
             onnx.save(onnx_model, "pjmrecognizer.onnx")
 
         else:
@@ -65,7 +66,6 @@ class Model():
         
     def Predict(self, sample: np.array) -> str:
         predictions = self.model(sample)
-        print(predictions)
         label = self.classes[np.argmax(predictions)]
         confidence = np.max(predictions) / np.sum(predictions)
         return label, confidence 
