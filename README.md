@@ -14,9 +14,7 @@ The program uses OpenCV and Mediapipe to retrieve video feed and detect hands in
 |INDEX|TYPE|UNITS|ACTIVATION|
 |-|:-:|:-:|:-:|
 |0|INPUT|441|-|
-|1|HIDDEN|256|RELU|
-|2|HIDDEN|128|RELU|
-|3|OUTPUT|26|SOFTMAX|
+|1|OUTPUT|26|SOFTMAX|
 
 The default training parameters for the network are as follows:
 - Number of epochs: **10**
