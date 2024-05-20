@@ -1,11 +1,13 @@
 from data_loader import *
-from model import *
+from model_static import *
+from model_dynamic import *
 from functions import *
 from tester import *
+from data_loader import LoadDataDynamic
 
 # Model able to accept new samples and train during runtime; newly learned information can be verified immediately after training
-def main():
-    recognizer = Model(classes, epochs=10, batch_size=1, learning_rate=0.00001)
+def main_static():
+    recognizer = Model(classes, epochs=10, batch_size=1, learning_rate=0.00001, from_checkpoint=False)
     capture = cv2.VideoCapture(0)
     mp_hands = mp.solutions.hands
     hand_recognizer = mp_hands.Hands()
@@ -33,12 +35,6 @@ def main():
                             sample = np.expand_dims(sample, axis=-1)
                             sample = np.expand_dims(sample, axis=0)
                             label, confidence = recognizer.Predict(sample)  # Feed to network
-                            if confidence < .5: # If network is not confident enough, use simple prediction
-                                sample = sample[0, :, 0].reshape((21, 21))
-                                label_1, confidence_1 = RecognizeLetter(sample)
-                                if confidence_1 > confidence:
-                                    confidence = confidence_1
-                                    label = label_1
                             color = (0, confidence*255, (1-confidence)*255) # Set color depending on confidence
                             cv2.putText(img, label, (w // 2, 70), cv2.FONT_HERSHEY_PLAIN, 5, color, 5) # Display result
                             if display_landmarks:
@@ -51,9 +47,9 @@ def main():
                             sample = ConvertToNumpy(hand_landmarks)
 
                             print('Waiting for label')
-                            label = cv2.waitKey() - 97
+                            label = cv2.waitKey()
                             if chr(label) not in letters: # If not a lowercase letter
-                                print('Invalid label. Cancelled saving sample')
+                                print('Invalid label: {}. Cancelled saving sample'.format(chr(label)))
 
                             else:
                                 filepath = 'pjm_' + save_mode + '_set.csv'
@@ -76,15 +72,6 @@ def main():
                         recognizer.TrainModel(choice)
                         print('Retrained model successfully')
 
-                # DO NOT USE - remove sample manually if you make a mistake
-                # case 100:
-                #     # Delete last sample
-                #     filepath = 'pjm_' + save_mode + '_set.csv'
-                #     if DeleteLastSample(filepath):
-                #         print('Removed sample from {} set'.format(filepath))
-                #     else:
-                #         print('Failed to removed sample from {} set'.format(filepath))
-
             work_mode = 114
                         
             cv2.imshow('Webcam', img)
@@ -101,4 +88,42 @@ def main():
             elif key != -1:
                 work_mode = key
 
-main()
+def main_dynamic():
+    input_size = 22*21
+    hidden_size = 128
+    output_size = 5
+    epochs = 5
+
+    recognizer = ModelRNN(input_size, hidden_size, output_size)
+    Train(recognizer, epochs, output_size)
+
+    capture = cv2.VideoCapture(0)
+    mp_hands = mp.solutions.hands
+    hand_recognizer = mp_hands.Hands()
+    mp_drawing = mp.solutions.drawing_utils
+
+    while 1:
+        not_empty, img = capture.read()
+        if not_empty:
+            h, w, c = img.shape
+            imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            results = hand_recognizer.process(imgRGB)
+
+            if results.multi_hand_landmarks:
+                for hand_landmarks in results.multi_hand_landmarks:
+                    sample = ConvertToNumpy(hand_landmarks)
+                    sample = torch.tensor(sample)
+                    sample = np.expand_dims(sample, axis=-1)
+                    sample = np.expand_dims(sample, axis=0)
+
+                    label, confidence = Predict(recognizer, sample)
+
+                    color = (0, confidence*255, (1-confidence)*255)
+                    cv2.putText(img, label, (w // 2, 70), cv2.FONT_HERSHEY_PLAIN, 5, color, 5)
+                    mp_drawing.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+        
+        cv2.imshow('Webcam', img)
+        cv2.waitKey(1)
+
+# main_static()
+main_dynamic()
