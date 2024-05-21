@@ -89,15 +89,16 @@ def main_static():
                 work_mode = key
 
 def main_dynamic():
-    input_size = 21*21
+    input_size = 21*3
     hidden_size = 128
     output_size = 2
     epochs = 20
-    prev = torch.zeros(1, 1, 441)
-    curr = torch.zeros(1, 1, 441)
+    prev = torch.zeros(1, 1, input_size)
+    curr = torch.zeros(1, 1, input_size)
+    sample = []
 
     recognizer = ModelRNN(input_size, hidden_size, output_size)
-    Train(recognizer, epochs, output_size)
+    Train(recognizer, epochs, input_size)
 
     capture = cv2.VideoCapture(0)
     mp_hands = mp.solutions.hands
@@ -114,10 +115,11 @@ def main_dynamic():
 
             if results.multi_hand_landmarks:
                 for hand_landmarks in results.multi_hand_landmarks:
-                    sample = ConvertToNumpy(hand_landmarks)
+                    landmarks = ParseLandmarks(hand_landmarks)
+                    sample = [coord for landmark in landmarks for coord in landmark]
                     curr[0][0] = torch.tensor(sample)
 
-                    label, confidence, hidden = Predict(recognizer, torch.sub(curr, prev), hidden)
+                    label, confidence, hidden = Predict(recognizer, curr, hidden)
                     prev.copy_(curr)
 
                     color = (0, confidence*255, (1-confidence)*255)

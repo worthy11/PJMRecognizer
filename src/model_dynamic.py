@@ -26,7 +26,7 @@ class ModelRNN(nn.Module):
         return torch.zeros(1, self.hidden_size)
 
 
-def Train(model: ModelRNN, epochs, output_size):
+def Train(model: ModelRNN, epochs, input_size):
     (train_set, train_labels), (test_set, test_labels) = LoadDataDynamic()
     criterion = nn.NLLLoss()
     learning_rate = 0.005
@@ -37,7 +37,7 @@ def Train(model: ModelRNN, epochs, output_size):
         for idx, sample in enumerate(train_set):
             
             # n_frames x 1 x 441
-            tensor = torch.zeros(len(sample), 1, 441)
+            tensor = torch.zeros(len(sample), 1, input_size)
             for frame_idx, frame in enumerate(sample):
                 tensor[frame_idx][0] = torch.tensor(frame)
             
