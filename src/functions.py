@@ -63,14 +63,12 @@ def ComputeDistances(arr: np.array, ndims: int) -> np.array:
             distances[i*21+j] = np.sqrt(dx**2 + dy**2)
     return distances
 
-def ConvertToNumpy(hand_landmarks) -> np.array:
+def ParseLandmarks(hand_landmarks) -> list:
     coords = list()
     
     for landmark in hand_landmarks.landmark:
-        coords.append([landmark.x, landmark.y])
-    received = np.array(coords)
-    observed = ComputeDistances(received, 2)
-    return observed
+        coords.append([landmark.x, landmark.y, landmark.z])
+    return coords
 
 # Predictions are made by comparing distances between landmarks with an established base (data/base.npy)
 def RecognizeLetter(sample: np.array) -> str:
