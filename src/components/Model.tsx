@@ -1,32 +1,75 @@
 import { Tensor, InferenceSession } from "onnxjs";
+import {
+  PoseLandmarker,
+  HandLandmarker,
+  FilesetResolver,
+} from "@mediapipe/tasks-vision";
 
-const extractor = new InferenceSession();
+const vision = await FilesetResolver.forVisionTasks(
+  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
+);
+const handLandmarker = await HandLandmarker.createFromOptions(vision, {
+  baseOptions: {
+    modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+    delegate: "GPU",
+  },
+  numHands: 2,
+});
+const poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+  baseOptions: {
+    modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
+    delegate: "GPU",
+  },
+  numPoses: 2,
+});
+
 const lstm = new InferenceSession();
-const source = "./assets/pjmrecognizer.onnx";
+const modelUrl = "./assets/pjmrecognizer.onnx";
+await lstm.loadModel(modelUrl);
 
-await extractor.loadModel(source);
-await lstm.loadModel(source);
+function extractLandmarks(frame: ImageData) {
+  const hands = handLandmarker.detect(frame);
+  const body = poseLandmarker.detect(frame);
 
-const inputs = [
-  new Tensor(new Float32Array([1.0, 2.0, 3.0, 4.0]), "float32", [2, 2]),
-];
+  const numHands = hands.landmarks.length;
+  let landmarks = Array(266).fill(0);
 
-const extract_landmarks = async (frame: ImageBitmap) => {
-  const input = new Tensor(new Float32Array(frame), "float32", [
-    frame.height,
-    frame.width,
-  ]);
-  const landmarks = await extractor.run(frame);
+  switch (numHands) {
+    case 0:
+      break;
 
-  // Process landmarks
+    case 1:
+      if (hands.handedness[0][0].index) {
+        landmarks.fill(hands.landmarks[0], 112 * 2, 133 * 2);
+      } else {
+        landmarks.fill(hands.landmarks[0], 91 * 2, 112 * 2);
+      }
+      break;
 
-  return new Tensor(new Float32Array(landmarks), "float32", [
-    landmarks.size,
-    2,
-  ]);
-};
+    case 2:
+      if (hands.handedness[0][0].index) {
+        landmarks.fill(hands.landmarks[0], 112 * 2, 133 * 2);
+        landmarks.fill(hands.landmarks[1], 91 * 2, 112 * 2);
+      } else {
+        landmarks.fill(hands.landmarks[0], 91 * 2, 112 * 2);
+        landmarks.fill(hands.landmarks[1], 112 * 2, 133 * 2);
+      }
+  }
+  landmarks.fill(body.landmarks[0][0], 0, 2);
+  landmarks.fill(body.landmarks[0][11], 5 * 2, 6 * 2);
+  landmarks.fill(body.landmarks[0][12], 6 * 2, 7 * 2);
 
-export const process_frame = async (frame: ImageBitmap) => {
-  const landmarks = extract_landmarks(frame);
+  return landmarks;
+}
+
+export const getPrediction = async (imageData: ImageData) => {
+  const landmarks = [
+    new Tensor(
+      new Float32Array(extractLandmarks(imageData)),
+      "float32",
+      [133, 2]
+    ),
+  ];
   const prediction = await lstm.run(landmarks);
+  return prediction;
 };

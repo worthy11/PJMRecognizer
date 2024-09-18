@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { getPrediction } from "./Model.tsx";
 
 const CameraComponent: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -13,7 +14,7 @@ const CameraComponent: React.FC = () => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
-        setInterval(processFrame, 20);
+        setInterval(processFrame, 10);
       } catch (error) {
         console.error("Error accessing camera:", error);
       }
@@ -48,10 +49,9 @@ const CameraComponent: React.FC = () => {
           canvas.height
         );
 
-        // Pass the image data to your AI model here for processing
-        // model.predict(imageData)
+        const landmarks = getPrediction(imageData);
 
-        requestAnimationFrame(processFrame);
+        // requestAnimationFrame(processFrame);
       }
     }
   };
