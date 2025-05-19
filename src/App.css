@@ -1,0 +1,123 @@
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  background-color: #FFF3F0;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #9046CF;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(144, 70, 207, 0.2);
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.webcam-section {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  background-color: #FFF3F0;
+  padding: 1rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(204, 89, 210, 0.2);
+}
+
+.webcam-container {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(144, 70, 207, 0.3);
+  border: 3px solid #F487B6;
+}
+
+.word-section {
+  width: 100%;
+  max-width: 640px;
+  padding: 2rem;
+  background-color: #FFF3F0;
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(204, 89, 210, 0.2);
+  border: 2px solid #F487B6;
+}
+
+.word-display {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  min-height: 3rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: bold;
+  color: #9046CF;
+}
+
+.new-word-button {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  background-color: #CC59D2;
+  color: #FFF3F0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(204, 89, 210, 0.3);
+}
+
+.new-word-button:hover {
+  background-color: #9046CF;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(144, 70, 207, 0.4);
+}
+
+.new-word-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(144, 70, 207, 0.3);
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 3rem;
+  }
+
+  .webcam-section,
+  .word-section {
+    flex: 1;
+  }
+}
+
+/* Add a subtle gradient background to the page */
+body {
+  background: linear-gradient(135deg, #FFF3F0 0%, #F487B6 100%);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.prediction {
+  font-size: 48px;
+  font-weight: bold;
+  text-align: center;
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #f0f0f0;
+  transition: background-color 0.3s ease;
+}
+
+.prediction.correct {
+  background-color: #90EE90;
+  color: #006400;
+}
