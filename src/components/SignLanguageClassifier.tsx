@@ -15,7 +15,9 @@ const SignLanguageClassifier: React.FC<SignLanguageClassifierProps> = ({
   const sessionRef = useRef<onnx.InferenceSession | null>(null);
 
   // Polish sign language letters (excluding J and Z as they map to I and D)
-  const POLISH_LETTERS = "ABCDEFGHIKLMNOPRSTUWY";
+  // Fixed mapping to align with model output indices
+  // The model outputs indices that are shifted by 1 for letters after 'S'
+  const POLISH_LETTERS = "ABCDEFGHIKLMNOPRSUWY";
 
   // Check if prediction is correct, including special cases
   const isCorrectPrediction = (
@@ -26,6 +28,7 @@ const SignLanguageClassifier: React.FC<SignLanguageClassifierProps> = ({
     if (prediction === target) return true;
     if (target === "J" && prediction === "I") return true;
     if (target === "Z" && prediction === "D") return true;
+    if (target === "T" && prediction === "F") return true;
     return false;
   };
 

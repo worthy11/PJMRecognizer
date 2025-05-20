@@ -10,6 +10,7 @@ function App() {
   const [prediction, setPrediction] = useState<string>("");
   const [targetLetter, setTargetLetter] = useState<string>("");
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
+  const [showLandmarks, setShowLandmarks] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const handleFrame = useCallback((frame: ImageData) => {
@@ -39,16 +40,29 @@ function App() {
     setIsCorrect(false);
   }, []);
 
+  const toggleLandmarks = () => {
+    setShowLandmarks(prev => !prev);
+  };
+
   return (
     <div className="app">
       <h1>Polish Sign Language Recognizer</h1>
 
       <div className="main-content">
         <div className="webcam-section">
+          <div className="webcam-controls">
+            <button 
+              onClick={toggleLandmarks}
+              className={`landmark-toggle ${showLandmarks ? 'active' : ''}`}
+            >
+              {showLandmarks ? 'Hide Landmarks' : 'Show Landmarks'}
+            </button>
+          </div>
           <WebcamComponent onFrame={handleFrame} onVideoRef={handleVideoRef} />
           <HandLandmarkExtractor
             onLandmarks={handleLandmarks}
             videoRef={videoRef}
+            showLandmarks={showLandmarks}
           />
           <SignLanguageClassifier
             onPrediction={handlePrediction}

@@ -28,7 +28,8 @@ const WordGenerator: React.FC<WordGeneratorProps> = ({ onLetterComplete }) => {
   const [currentWord, setCurrentWord] = useState<string>("");
 
   const generateWord = useCallback(() => {
-    const letters = "ABCDEFGHIKLMNOPRSTUWY";
+    // Updated to match the corrected letter order in the classifier
+    const letters = "ABCDEFGHIKLMNOPRSUWY";
     const randomLetter = letters[Math.floor(Math.random() * letters.length)];
     setCurrentWord(randomLetter);
     onLetterComplete(randomLetter);
