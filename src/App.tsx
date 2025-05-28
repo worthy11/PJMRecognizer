@@ -5,13 +5,46 @@ import SignLanguageClassifier from "./components/SignLanguageClassifier";
 import WordGenerator from "./components/WordGenerator";
 import "./App.css";
 
+// Translations for UI elements
+const translations = {
+  en: {
+    showLandmarks: "Show Landmarks",
+    hideLandmarks: "Hide Landmarks",
+    currentPrediction: "Current Prediction",
+    alphabetGuide: "Polish Sign Language Alphabet",
+    language: "PL",
+    generateNewWord: "Generate New Word"
+  },
+  pl: {
+    showLandmarks: "Pokaż punkty charakterystyczne",
+    hideLandmarks: "Ukryj punkty charakterystyczne",
+    currentPrediction: "Rozpoznana litera",
+    alphabetGuide: "Polski Alfabet Migowy",
+    language: "EN",
+    generateNewWord: "Wygeneruj nowe słowo"
+  }
+};
+
+// Define interchangeable letters in Polish sign language
+const interchangeableLetters: Record<string, string[]> = {
+  'I': ['J'],
+  'J': ['I'],
+  'D': ['Z'],
+  'Z': ['D'],
+  'F': ['T'],
+  'T': ['F']
+};
+
 function App() {
   const [landmarks, setLandmarks] = useState<number[]>([]);
   const [prediction, setPrediction] = useState<string>("");
   const [targetLetter, setTargetLetter] = useState<string>("");
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [showLandmarks, setShowLandmarks] = useState<boolean>(false);
+  const [language, setLanguage] = useState<"en" | "pl">("en");
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const t = translations[language];
 
   const handleFrame = useCallback((frame: ImageData) => {
     // This will be handled by the HandLandmarkExtractor
@@ -27,11 +60,22 @@ function App() {
 
   const handlePrediction = (pred: string) => {
     setPrediction(pred);
-    // Check if prediction is correct
-    const correct =
-      pred === targetLetter ||
-      (targetLetter === "J" && pred === "I") ||
-      (targetLetter === "Z" && pred === "D");
+    
+    // Check if prediction is correct using interchangeable letters logic
+    let correct = pred === targetLetter;
+    
+    // Check interchangeable letters (works bidirectionally)
+    if (!correct) {
+      // Check if the target letter has interchangeable alternatives
+      if (interchangeableLetters[targetLetter]?.includes(pred)) {
+        correct = true;
+      }
+      // Check if the prediction has interchangeable alternatives that match the target
+      else if (interchangeableLetters[pred]?.includes(targetLetter)) {
+        correct = true;
+      }
+    }
+    
     setIsCorrect(correct);
   };
 
@@ -44,9 +88,18 @@ function App() {
     setShowLandmarks(prev => !prev);
   };
 
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === "en" ? "pl" : "en");
+  };
+
   return (
     <div className="app">
-      <h1>Polish Sign Language Recognizer</h1>
+      <div className="app-header">
+        <h1>Polish Sign Language Alphabet Recognizer</h1>
+        <button onClick={toggleLanguage} className="language-toggle">
+          {t.language}
+        </button>
+      </div>
 
       <div className="main-content">
         <div className="webcam-section">
@@ -55,7 +108,7 @@ function App() {
               onClick={toggleLandmarks}
               className={`landmark-toggle ${showLandmarks ? 'active' : ''}`}
             >
-              {showLandmarks ? 'Hide Landmarks' : 'Show Landmarks'}
+              {showLandmarks ? t.hideLandmarks : t.showLandmarks}
             </button>
           </div>
           <WebcamComponent onFrame={handleFrame} onVideoRef={handleVideoRef} />
@@ -69,13 +122,30 @@ function App() {
             landmarks={landmarks}
             targetLetter={targetLetter}
           />
+          <div className="current-prediction">
+            <div className="prediction-label">{t.currentPrediction}</div>
+            <div className={`prediction ${isCorrect ? "correct" : ""}`}>
+              {prediction}
+            </div>
+          </div>
         </div>
 
         <div className="word-section">
-          <div className={`prediction ${isCorrect ? "correct" : ""}`}>
-            {prediction}
+          <WordGenerator 
+            onLetterComplete={handleLetterComplete} 
+            language={language}
+          />
+        </div>
+
+        <div className="instruction-section">
+          <div className="alphabet-guide">
+            <h3>{t.alphabetGuide}</h3>
+            <img 
+              src="/polski-alfabet-palcowy.jpg" 
+              alt="Polish Sign Language Alphabet Guide" 
+              className="alphabet-image"
+            />
           </div>
-          <WordGenerator onLetterComplete={handleLetterComplete} />
         </div>
       </div>
     </div>

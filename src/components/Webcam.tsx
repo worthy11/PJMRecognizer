@@ -13,8 +13,8 @@ const WebcamComponent: React.FC<WebcamComponentProps> = ({
   const webcamRef = useRef<Webcam>(null);
 
   const videoConstraints = {
-    width: 640,
-    height: 480,
+    width: 560,
+    height: 420,
     facingMode: "user",
   };
 

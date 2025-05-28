@@ -152,7 +152,14 @@ const SignLanguageClassifier: React.FC<SignLanguageClassifierProps> = ({
       // Check if prediction is correct
       const isCorrect = isCorrectPrediction(prediction, targetLetter);
 
+      // Call the onPrediction callback
       onPrediction(prediction);
+
+      // Dispatch custom event for word generator
+      const predictionEvent = new CustomEvent("predictionChange", {
+        detail: { prediction, isCorrect }
+      });
+      window.dispatchEvent(predictionEvent);
     } catch (error) {
       console.error("Error during inference:", error);
       console.error("Landmarks shape:", landmarks.length);
